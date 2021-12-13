@@ -1,0 +1,20 @@
+{
+    "settings": {
+        "number_of_shards": 2,
+        "number_of_replicas": 1
+    },
+    "mappings": {
+        "properties": {
+            "test_column": {
+                "type": "keyword"
+            },
+            "timestamp": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm:ss"
+            },
+            "number_column": {
+                "type": "integer"
+            }
+        }
+    }
+}

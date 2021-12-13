@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+    http_server:
+        image: http_server:latest
+        ports:
+            - "5000:5000"
+        tty: true
+        networks:
+            - httpServer_elasticSearch
+        depends_on:
+            - elastic_search
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+
+    elastic_search:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+        ports:
+            - 9200:9200
+        networks:
+            - httpServer_elasticSearch
+            - elasticSearch_grafana
+        environment:
+            - node.name=es01
+            - cluster.name=es-docker-cluster
+            - discovery.type=single-node
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        volumes:
+            - elastic_search_data:/usr/share/elasticsearch/data
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+
+    grafana:
+        image: grafana/grafana:latest
+        ports:
+            - "80:3000"
+        volumes:
+            - grafana_data:/var/lib/grafana
+            - grafana_etc:/etc/grafana
+        networks:
+            - elasticSearch_grafana
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+
+networks:
+    httpServer_elasticSearch:
+    elasticSearch_grafana:
+
+volumes:
+    elastic_search_data:
+    grafana_data:
+    grafana_etc:
