@@ -18,3 +18,11 @@
     ```
 
 ---
+
+## Connecting to grafana
+  Access the browser on `localhost:80`
+  
+  Username: `admin`   
+  Password: `admin`
+
+---

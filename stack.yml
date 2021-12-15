@@ -40,9 +40,11 @@ services:
                 condition: on-failure
 
     grafana:
-        image: grafana/grafana:latest
+        image: sinf_grafana:latest
         ports:
             - "80:3000"
+        depends_on:
+            - http_server
         volumes:
             - grafana_data:/var/lib/grafana
             - grafana_etc:/etc/grafana

@@ -5,14 +5,14 @@
     },
     "mappings": {
         "properties": {
-            "test_column": {
+            "query_arguments": {
                 "type": "keyword"
             },
             "timestamp": {
                 "type": "date",
                 "format": "yyyy-MM-dd HH:mm:ss"
             },
-            "number_column": {
+            "response_status": {
                 "type": "integer"
             }
         }

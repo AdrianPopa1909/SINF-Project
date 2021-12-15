@@ -26,13 +26,18 @@ done
 
 function deploy_docker() {
     docker build -t http_server server
+    docker build -t sinf_grafana grafana
     docker stack deploy --compose-file stack.yml $STACK_NAME
 }
 
 function stop_docker() {
     docker stack rm $STACK_NAME
     docker image rm --force http_server:latest
-    docker volume rm ${STACK_NAME}_db_data
+    docker image rm --force sinf_grafana:latest
+
+    docker volume rm --force ${STACK_NAME}_elastic_search_data
+    docker volume rm --force ${STACK_NAME}_grafana_data
+    docker volume rm --force ${STACK_NAME}_grafana_etc
 }
 
 
