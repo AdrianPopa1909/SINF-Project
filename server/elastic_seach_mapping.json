@@ -5,6 +5,15 @@
     },
     "mappings": {
         "properties": {
+            "method": {
+                "type": "keyword"
+            },
+            "auth": {
+                "type": "keyword"
+            },
+            "path": {
+                "type": "keyword"
+            },
             "query_arguments": {
                 "type": "keyword"
             },

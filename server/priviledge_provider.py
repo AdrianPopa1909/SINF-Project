@@ -4,6 +4,7 @@ import json
 from functools import wraps
 import flask as flaskk
 from flask import request, abort
+from es_client import es_client
 objects_priviledges = []
 
 
@@ -48,8 +49,10 @@ def check_path_priviledge(f):
             if decoded["username"] not in path_blacklist[request.path][request.method]:
                 return f(*args, **kwargs)
             else:
+                es_client.addEntry(request, 401)
                 abort(401)
         else:
+            es_client.addEntry(request, 401)
             abort(401)
 
     return decorated_function
@@ -67,6 +70,7 @@ def check_obj_priviledge_to_alter(f):
                     if (decoded["username"] in datum["users_ro"]) or (decoded["username"] in datum["users_rw"]):
                         if str(datum["id"]) == str(request.args.get('id')):
                             return json.dumps(datum, indent=2)
+            es_client.addEntry(request, 401)
             abort(401)
 
         elif request.method == "POST":
@@ -80,6 +84,7 @@ def check_obj_priviledge_to_alter(f):
                             objects_priviledges[index] = dict(request.json)
                             status_code = flaskk.Response(status=201)
                             return status_code
+            es_client.addEntry(request, 401)
             abort(401)
     return decorated_function
 
@@ -97,6 +102,7 @@ def check_obj_priviledge(category=None):
                         if (decoded["username"] in datum["users_ro"]) or (decoded["username"] in datum["users_rw"]):
                             if str(datum["id"]) == str(request.args.get('id')):
                                 return f(*args, **kwargs)
+                es_client.addEntry(request, 404)
                 abort(404)
             elif request.method == "DELETE":
                 header = request.headers["Authorization"]
@@ -108,6 +114,7 @@ def check_obj_priviledge(category=None):
                             if str(datum["id"]) == str(request.args.get('id')):
                                 objects_priviledges.pop(index)
                                 return f(*args, **kwargs)
+                es_client.addEntry(request, 404)
                 abort(404)
 
             else:
@@ -118,6 +125,7 @@ def check_obj_priviledge(category=None):
                     if datum["category"] == category:
                         if decoded["username"] in datum["users_rw"]:
                             return f(*args, **kwargs)
+                es_client.addEntry(request, 404)
                 abort(404)
 
         return decorated_function
@@ -153,6 +161,7 @@ def authenticate_user(creds):
             # send the user the token to do whaever he wants
             encoded = jwt.encode(
                 {"username": "cisco", "time": expiration}, "secret", algorithm="HS256")
+            es_client.addEntryAuth(request, "username="+creds["username"], str(encoded), 200)
             return {"token": str(encoded)}
         elif creds["username"] == "hacker" and creds["password"] == "cisco":
             expiration = (datetime.now() + timedelta(minutes=5)
@@ -161,8 +170,10 @@ def authenticate_user(creds):
             # send the user the token to do whaever he wants
             encoded = jwt.encode(
                 {"username": creds["username"], "time": expiration}, "secret", algorithm="HS256")
+            es_client.addEntryAuth(request, "username="+creds["username"], str(encoded), 200)
             return {"token": str(encoded)}
         else:
             return "Bad creds"
     except Exception as e:
-        return "Something went wrong! With authentic_user() function  "+str(e)
+        es_client.addEntryAuth(request, "username="+creds.get("username", ""), str(encoded), 404)
+        return "Something went wrong! With authenticate_user() function  "+str(e)
