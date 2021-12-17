@@ -26,3 +26,9 @@
   Password: `admin`
 
 ---
+
+## Run a simple test with an attacker
+
+    python3 attacker.py
+
+---

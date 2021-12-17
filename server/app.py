@@ -48,7 +48,7 @@ def create_card():
     user_data["card_number"] = random.randint(100000,9999999)
     user_data["id"] = random.randint(1,200)
     fake_db.append(user_data)
-    es_client.addEntry(request, 200)
+    es_client.addEntryJson(request, user_data, 200)
     return json.dumps(user_data)
 
 @app.route('/delete-card', methods=["DELETE"])

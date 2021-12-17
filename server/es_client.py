@@ -16,7 +16,7 @@ class ESClient(object):
         
         while not self.client.ping():
             print('elastic search db not responfing')
-        time.sleep(5)
+            time.sleep(5)
         print('elastic search db is up')
 
         es_config_file = open("elastic_seach_mapping.json", "r")
@@ -24,9 +24,9 @@ class ESClient(object):
 
         exists = self.client.indices.exists(index=self.index_name)
         if exists:
-                result = self.client.indices.put_mapping(index=self.index_name, body=es_config["mappings"])
-                print('Updating mapping: %s'%result)
-                self.client.indices.open(index=self.index_name)
+            result = self.client.indices.put_mapping(index=self.index_name, body=es_config["mappings"])
+            print('Updating mapping: %s'%result)
+            self.client.indices.open(index=self.index_name)
         else:
             self.client.indices.create(
                 index=self.index_name,
@@ -60,6 +60,23 @@ class ESClient(object):
         entry['method'] = req.method
         entry['path'] = req.path
         entry['query_arguments'] = args
+        entry['response_status'] = status
+        entry['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        print("New entry: %s"%entry)
+
+        json_data = json.dumps(entry)
+        result = self.client.index(index=self.index_name, id=self.index, document=json_data)
+        print("Updating the client index %s"%result)
+
+        self.index = self.index + 1
+    
+    def addEntryJson(self, req, args, status):
+        entry = dict()
+        entry['auth'] = req.headers.get("Authorization")
+        entry['method'] = req.method
+        entry['path'] = req.path
+        entry['query_arguments'] = " ".join([x + "=" + str(args[x]) for x in args])
         entry['response_status'] = status
         entry['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
