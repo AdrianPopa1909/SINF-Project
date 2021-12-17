@@ -102,8 +102,8 @@ def check_obj_priviledge(category=None):
                         if (decoded["username"] in datum["users_ro"]) or (decoded["username"] in datum["users_rw"]):
                             if str(datum["id"]) == str(request.args.get('id')):
                                 return f(*args, **kwargs)
-                es_client.addEntry(request, 404)
-                abort(404)
+                es_client.addEntry(request, 401)
+                abort(401)
             elif request.method == "DELETE":
                 header = request.headers["Authorization"]
                 bearer = header.split(" ")[1]
@@ -114,8 +114,8 @@ def check_obj_priviledge(category=None):
                             if str(datum["id"]) == str(request.args.get('id')):
                                 objects_priviledges.pop(index)
                                 return f(*args, **kwargs)
-                es_client.addEntry(request, 404)
-                abort(404)
+                es_client.addEntry(request, 401)
+                abort(401)
 
             else:
                 header = request.headers["Authorization"]
@@ -125,8 +125,8 @@ def check_obj_priviledge(category=None):
                     if datum["category"] == category:
                         if decoded["username"] in datum["users_rw"]:
                             return f(*args, **kwargs)
-                es_client.addEntry(request, 404)
-                abort(404)
+                es_client.addEntry(request, 401)
+                abort(401)
 
         return decorated_function
     return decorator
